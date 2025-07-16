@@ -1,0 +1,19 @@
+{
+  "admin": {
+    "token": "valid_admin_token",
+    "name": "Admin",
+    "email": "admin@example.com",
+    "password": "AdminPass123"
+  },
+  "user": {
+    "token": "valid_user_token",
+    "name": "Normal User",
+    "email": "user@example.com",
+    "password": "UserPass123"
+  },
+  "malicious": {
+    "name": "<script>alert(1)</script>",
+    "email": "' OR '1'='1",
+    "password": "; DROP TABLE users;"
+  }
+}
