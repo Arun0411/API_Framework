@@ -2,7 +2,7 @@
 <suite name="Automation Test Suite" parallel="false">
     <test name="Regression Tests">
         <classes>
-            <class name="TestExecution.TestCase_1"/>
+            <class name="Tests.TestCase_1"/>
             <!-- Add more test classes here -->
         </classes>
     </test>
