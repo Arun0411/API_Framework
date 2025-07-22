@@ -1,30 +1,26 @@
 package Tests;
 
-import Base.BaseTest;
+import BaseClass.BaseTest;
 import Utilities.TestDataUtil;
-import com.fasterxml.jackson.databind.JsonNode;
 import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
+import java.util.Map;
 
 public class SensitiveDataExposureTest extends BaseTest {
 
-    private String adminToken;
+    private Map<String, Object> adminTokenHeaders;
 
     @BeforeClass
-    public void setUp() throws IOException {
-        JsonNode admin = TestDataUtil.getUser("users.json", "admin");
-        adminToken = TestDataUtil.getField(admin, "token");
+    public void setUp() {
+        adminTokenHeaders = Map.of("Authorization", "Bearer " + TestDataUtil.getToken("admin_token"));
     }
 
     @Test
     public void testSensitiveFieldsAreNotExposedInUserList() {
-        RequestSpecification spec = getSpec(adminToken);
-        Response res = sendRequest("GET", "/users", spec, null, null);
+        Response res = restRequest.sendRequest("GET", "/users", null, null, adminTokenHeaders);
 
         int statusCode = res.getStatusCode();
         String responseBody = res.getBody().asString();

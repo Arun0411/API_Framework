@@ -2,8 +2,15 @@
 <suite name="Automation Test Suite" parallel="false">
     <test name="Regression Tests">
         <classes>
-            <class name="Tests.TestCase_1"/>
-            <!-- Add more test classes here -->
+            <class name="Tests.AuthenticationCheckTest"/>
+            <class name="Tests.ErrorHandlingTest"/>
+            <class name="Tests.HTTPMethodTamperingTest"/>
+            <class name="Tests.IDORTest"/>
+            <class name="Tests.InjectionAttackTest"/>
+            <class name="Tests.MassAssignmentTest"/>
+            <class name="Tests.RateLimitingTest"/>
+            <class name="Tests.RoleBasedAccessTest"/>
+            <class name="Tests.SensitiveDataExposureTest"/>
         </classes>
     </test>
 </suite>

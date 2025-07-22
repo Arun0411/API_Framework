@@ -1,29 +1,25 @@
 package Tests;
 
-import Base.BaseTest;
+import BaseClass.BaseTest;
 import Utilities.TestDataUtil;
-import com.fasterxml.jackson.databind.JsonNode;
 import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
+import java.util.Map;
 
 public class HTTPMethodTamperingTest extends BaseTest {
 
-    private String userToken;
+    private Map<String, Object> userTokenHeaders;
 
     @BeforeClass
-    public void setUpToken() throws IOException {
-        JsonNode user = TestDataUtil.getUser("users.json", "user");
-        userToken = TestDataUtil.getField(user, "token");
+    public void setUp() {
+        userTokenHeaders = Map.of("Authorization", "Bearer " + TestDataUtil.getToken("user_token"));
     }
-
+    
     @Test
     public void testUnsupportedMethods_shouldBeBlocked() {
-        RequestSpecification spec = getSpec(userToken);
 
         String[] unsupportedMethods = {"PATCH", "TRACE", "OPTIONS", "CONNECT"};
 
@@ -32,7 +28,7 @@ public class HTTPMethodTamperingTest extends BaseTest {
 
             Response res;
             try {
-                res = sendTamperedMethod(method, "/users", spec);
+                res = restRequest.sendRequest(method, "/users", null, null, null);
                 int statusCode = res.getStatusCode();
 
                 System.out.println(method + " /users → Status Code: " + statusCode);
@@ -44,13 +40,5 @@ public class HTTPMethodTamperingTest extends BaseTest {
                 System.out.println("✅ " + method + " is likely blocked or not supported: " + e.getMessage());
             }
         }
-    }
-
-    // Custom method to bypass sendRequest() switch logic and use unsupported HTTP verbs
-    private Response sendTamperedMethod(String method, String endpoint, RequestSpecification spec) {
-        return io.restassured.RestAssured
-                .given()
-                .spec(spec)
-                .request(method, BASE_URI + endpoint);
     }
 }

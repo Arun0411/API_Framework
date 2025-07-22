@@ -1,8 +1,7 @@
 package Tests;
 
-import Base.BaseTest;
+import BaseClass.BaseTest;
 import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -11,12 +10,10 @@ import java.util.Map;
 public class RateLimitingTest extends BaseTest {
 
     @Test
-    public void testRateLimitingWithRepeatedLoginRequests() throws InterruptedException {
+    public void testRateLimitingWithRepeatedLoginRequests() {
         System.out.println("===== Rate Limiting & Brute Force Simulation Test =====");
-
-        RequestSpecification spec = getSpecWithoutAuth();
-
-        Map<String, String> payload = Map.of(
+        
+        Map<String, Object> payload = Map.of(
                 "username", "user@example.com",  // replace with actual user
                 "password", "invalidPassword"
         );
@@ -26,7 +23,7 @@ public class RateLimitingTest extends BaseTest {
         int otherErrorCount = 0;
 
         for (int i = 1; i <= totalRequests; i++) {
-            Response res = sendRequest("POST", "/auth/login", spec, payload, null);
+            Response res = restRequest.sendRequest("POST", "/auth/login", payload, null, null);
             int statusCode = res.getStatusCode();
             System.out.println("Request " + i + " → Status Code: " + statusCode);
 
@@ -35,8 +32,6 @@ public class RateLimitingTest extends BaseTest {
             } else if (statusCode != 401 && statusCode != 403) {
                 otherErrorCount++;
             }
-
-            Thread.sleep(100); // 100ms delay between requests to simulate brute force
         }
 
         System.out.println("➤ Total 429 responses: " + count429);

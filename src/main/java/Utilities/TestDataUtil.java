@@ -12,32 +12,40 @@ import java.io.IOException;
  */
 public class TestDataUtil {
 
-    // Base directory where all test data JSON files are stored
-    private static final String BASE_PATH = "src/test/resources/testdata/";
+    private static final ConfigReader configReader = new ConfigReader();
 
     /**
      * Reads a JSON file and returns the root JsonNode object.
      *
-     * @param fileName Name of the JSON file (e.g., users.json)
+     * @param filePath Path of the JSON file (e.g., src/test/resources/testData/users.json)
      * @return Root JsonNode
      * @throws IOException if file read fails
      */
-    public static JsonNode getJsonNode(String fileName) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper(); // JSON parser
-        return objectMapper.readTree(new File(BASE_PATH + fileName)); // Parse JSON
+    public static JsonNode getJsonNode(String filePath) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.readTree(new File(filePath));
     }
 
     /**
      * Retrieves a nested JsonNode (e.g., admin/user) from a JSON file.
      *
-     * @param fileName Name of the JSON file
      * @param userType Top-level key (e.g., "admin", "user")
      * @return JsonNode representing that user block
      * @throws IOException if file read fails
      */
-    public static JsonNode getUser(String fileName, String userType) throws IOException {
-        JsonNode root = getJsonNode(fileName);
+    public static JsonNode getUser(String userType) throws IOException {
+        JsonNode root = getJsonNode(configReader.getUserTestData());
         return root.get(userType); // Returns node under that key
+    }
+
+    public static String getToken(String tokenType) {
+        JsonNode root = null;
+        try {
+            root = getJsonNode(configReader.getTokenTestData());
+        } catch (IOException e) {
+            return "";
+        }
+        return getField(root, tokenType); // Returns node under that key
     }
 
     /**

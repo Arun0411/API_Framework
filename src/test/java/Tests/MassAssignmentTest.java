@@ -1,41 +1,35 @@
 package Tests;
 
-import Base.BaseTest;
+import BaseClass.BaseTest;
 import Utilities.TestDataUtil;
-import com.fasterxml.jackson.databind.JsonNode;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MassAssignmentTest extends BaseTest {
 
-    private String userToken;
+    private Map<String, Object> userTokenHeaders;
 
     @BeforeClass
-    public void setUp() throws IOException {
-        JsonNode user = TestDataUtil.getUser("users.json", "user");
-        userToken = TestDataUtil.getField(user, "token");
+    public void setUp() {
+        userTokenHeaders = Map.of("Authorization", "Bearer " + TestDataUtil.getToken("user_token"));
     }
 
     @Test
     public void testMassAssignmentOnPost_shouldIgnoreRestrictedFields() {
-        RequestSpecification spec = getSpec(userToken).contentType(ContentType.JSON);
-
+        
         Map<String, Object> payload = new HashMap<>();
         payload.put("name", "Test User");
         payload.put("email", "testmass@example.com");
         payload.put("password", "StrongPass123!");
-        payload.put("role", "admin");             // Should be ignored
-        payload.put("created_at", "2022-01-01");  // Should be ignored
+        payload.put("role", "admin");
+        payload.put("created_at", "2022-01-01");
 
-        Response res = sendRequest("POST", "/users", spec, payload, null);
+        Response res = restRequest.sendRequest("POST", "/users", payload, null, userTokenHeaders);
 
         int code = res.getStatusCode();
         String role = res.jsonPath().getString("role");
@@ -55,16 +49,15 @@ public class MassAssignmentTest extends BaseTest {
 
     @Test
     public void testMassAssignmentOnPut_shouldIgnoreRestrictedFields() {
-        RequestSpecification spec = getSpec(userToken).contentType(ContentType.JSON);
-
+        
         int userId = 123; // Replace with actual user ID
 
         Map<String, Object> payload = new HashMap<>();
         payload.put("name", "Updated User");
-        payload.put("role", "admin");              // Should not be updated
-        payload.put("created_at", "1990-01-01");   // Should be ignored
+        payload.put("role", "admin");
+        payload.put("created_at", "1990-01-01");
 
-        Response res = sendRequest("PUT", "/users/{id}", spec, payload, Map.of("id", userId));
+        Response res = restRequest.sendRequest("PUT", "/users/{id}", payload, Map.of("id", userId), userTokenHeaders);
 
         int code = res.getStatusCode();
         String role = res.jsonPath().getString("role");

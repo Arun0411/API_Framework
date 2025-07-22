@@ -1,9 +1,10 @@
 package Tests;
 
-import Base.BaseTest;
+import BaseClass.BaseTest;
+import Utilities.TestDataUtil;
 import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.*;
@@ -22,14 +23,18 @@ public class InjectionAttackTest extends BaseTest {
 
     private final String postEndpoint = "/users";
     private final String putEndpoint = "/users/{id}";
-    private final Map<String, ?> pathParams = Map.of("id", 123);
+    private final Map<String, Object> pathParams = Map.of("id", 123);
 
-    private final String token = "token"; // Reuse admin token for input testing
+    private Map<String, Object> userTokenHeaders;
+
+    @BeforeClass
+    public void setUp() {
+        userTokenHeaders = Map.of("Authorization", "Bearer " + TestDataUtil.getToken("user_token"));
+    }
 
     @Test
     public void testInjectionAttacksOnPostAndPut() {
-        RequestSpecification spec = getSpec(token);
-
+        
         for (String payload : payloads) {
             Map<String, Object> userBody = new HashMap<>();
             userBody.put("name", payload);
@@ -39,14 +44,14 @@ public class InjectionAttackTest extends BaseTest {
             System.out.println("\n---- Testing payload: " + payload + " ----");
 
             // POST /users
-            Response postRes = sendRequest("POST", postEndpoint, spec, userBody, null);
+            Response postRes = restRequest.sendRequest("POST", postEndpoint, userBody, null, userTokenHeaders);
             System.out.println("POST → Status: " + postRes.getStatusCode());
             Assert.assertTrue(postRes.getStatusCode() < 500, "POST caused server error for payload: " + payload);
             Assert.assertFalse(postRes.getStatusCode() == 200 || postRes.getStatusCode() == 201,
                     "POST should not succeed with malicious payload: " + payload);
 
             // PUT /users/{id}
-            Response putRes = sendRequest("PUT", putEndpoint, spec, userBody, pathParams);
+            Response putRes = restRequest.sendRequest("PUT", putEndpoint, userBody, pathParams, userTokenHeaders);
             System.out.println("PUT → Status: " + putRes.getStatusCode());
             Assert.assertTrue(putRes.getStatusCode() < 500, "PUT caused server error for payload: " + payload);
             Assert.assertFalse(putRes.getStatusCode() == 200,
